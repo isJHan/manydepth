@@ -33,7 +33,8 @@ class MonodepthOptions:
                                  type=str,
                                  help="which training split to use",
                                  choices=["eigen_zhou", "eigen_full", "odom", "benchmark",
-                                          "cityscapes_preprocessed"],
+                                          "cityscapes_preprocessed","mine_scene1","mine_scene2",
+                                          "mine_scene3","mine_scene4","mine_scene5","mine_scene6","mine_scene7"],
                                  default="eigen_zhou")
         self.parser.add_argument("--num_layers",
                                  type=int,
@@ -55,7 +56,7 @@ class MonodepthOptions:
                                  help="dataset to train on",
                                  default="kitti",
                                  choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test",
-                                          "cityscapes_preprocessed"])
+                                          "cityscapes_preprocessed","mine"])
         self.parser.add_argument("--png",
                                  help="if set, trains from raw KITTI png files (instead of jpgs)",
                                  action="store_true")
@@ -83,7 +84,7 @@ class MonodepthOptions:
         self.parser.add_argument("--max_depth",
                                  type=float,
                                  help="maximum depth",
-                                 default=100.0)
+                                 default=30.0)
         self.parser.add_argument("--frame_ids",
                                  nargs="+",
                                  type=int,
@@ -190,7 +191,7 @@ class MonodepthOptions:
         self.parser.add_argument("--save_frequency",
                                  type=int,
                                  help="number of epochs between each save",
-                                 default=1)
+                                 default=10)
         self.parser.add_argument("--save_intermediate_models",
                                  help="if set, save the model each time we log to tensorboard",
                                  action='store_true')
@@ -248,5 +249,6 @@ class MonodepthOptions:
                                  help='If set, the teacher network will be evaluated')
 
     def parse(self):
+        print(self.parser.parse_args())
         self.options = self.parser.parse_args()
         return self.options

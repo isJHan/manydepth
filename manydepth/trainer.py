@@ -21,10 +21,12 @@ from tensorboardX import SummaryWriter
 
 import json
 
-from .utils import readlines, sec_to_hm_str
-from .layers import SSIM, BackprojectDepth, Project3D, transformation_from_parameters, \
+from utils import readlines, sec_to_hm_str
+from layers import SSIM, BackprojectDepth, Project3D, transformation_from_parameters, \
     disp_to_depth, get_smooth_loss, compute_depth_errors
 
+import sys
+sys.path.append(".")
 from manydepth import datasets, networks
 import matplotlib.pyplot as plt
 
@@ -139,7 +141,8 @@ class Trainer:
         # DATA
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "cityscapes_preprocessed": datasets.CityscapesPreprocessedDataset,
-                         "kitti_odom": datasets.KITTIOdomDataset}
+                         "kitti_odom": datasets.KITTIOdomDataset,
+                         "mine": datasets.myDataset}
         self.dataset = datasets_dict[self.opt.dataset]
 
         fpath = os.path.join("splits", self.opt.split, "{}_files.txt")

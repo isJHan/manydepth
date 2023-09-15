@@ -50,7 +50,8 @@ class MonoDataset(data.Dataset):
         self.width = width
         self.num_scales = num_scales
 
-        self.interp = Image.ANTIALIAS
+        self.interp = Image.LANCZOS
+        # self.interp = Image.ANTIALIAS
 
         self.frame_idxs = frame_idxs
 
@@ -178,11 +179,14 @@ class MonoDataset(data.Dataset):
             inputs[("inv_K", scale)] = torch.from_numpy(inv_K)
 
         if do_color_aug:
-            color_aug = transforms.ColorJitter.get_params(
+            # color_aug = transforms.ColorJitter.get_params(
+            #     self.brightness, self.contrast, self.saturation, self.hue)
+            color_aug = transforms.ColorJitter(
                 self.brightness, self.contrast, self.saturation, self.hue)
         else:
             color_aug = (lambda x: x)
 
+        # print("color_aug", type(color_aug),color_aug)
         self.preprocess(inputs, color_aug)
 
         for i in self.frame_idxs:
@@ -204,3 +208,44 @@ class MonoDataset(data.Dataset):
 
     def get_depth(self, folder, frame_index, side, do_flip):
         raise NotImplementedError
+
+class myDataset(MonoDataset):
+    def __init__(self, data_path, filenames, height, width, frame_idxs, num_scales, is_train=False, img_ext='.jpg'):
+        super().__init__(data_path, filenames, height, width, frame_idxs, num_scales, is_train, img_ext)
+        fx = 721.57702076
+        fy = 721.35218324
+
+        cx = 575.5219464
+        cy = 513.41573387
+        
+        h,w = 992, 1152
+        # h,w = 496,576
+        self.K = np.array([
+            [fx/w, 0, cx/w, 0],
+            [0,fy/h, cy/h, 0],
+            [0,0,1,0],
+            [0,0,0,1]
+        ], dtype=np.float32)
+    
+    def get_color(self, folder, frame_index, side, do_flip):
+        color = self.loader("{}/{}/{:06d}.jpg".format(self.data_path, folder, frame_index))
+        if do_flip:
+            color = color.transpose(Image.FLIP_LEFT_RIGHT)
+
+        return color
+
+    def index_to_folder_and_frame_idx(self, index):
+        """Convert index in the dataset to a folder name, frame_idx and any other bits
+        """
+        line = self.filenames[index].split()
+        folder = line[0]
+        frame_index = int(line[1])
+        side = None
+
+        return folder, frame_index, side
+    
+    def check_depth(self):
+        return False
+    
+    def get_depth(self, folder, frame_index, side, do_flip):
+        return None
